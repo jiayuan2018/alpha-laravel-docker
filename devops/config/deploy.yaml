@@ -1,0 +1,134 @@
+docker:
+    site_list:
+        www_9dy: 
+          server_name: 'www.9douyu.com'
+          port: 21001
+          https: true
+        wx_9dy: 
+          server_name: 'wx.9douyu.com'
+          port: 21001
+          https: true
+        ios_9dy: 
+          server_name: 'ios.9douyu.com'
+          port: 21001
+          https: true
+        android_9dy: 
+          server_name: 'android.9douyu.com'
+          port: 21001
+          https: true
+        api_9dy: 
+          server_name: 'api.9douyu.com'
+          port: 21001
+          https: true
+        admin_9dy: 
+          server_name: 'admin.9douyu.com'
+          port: 21001
+          https: true
+        core_9dy: 
+          server_name: 'core.9douyu.com'
+          port: 21001
+          https: true
+        service_9dy: 
+          server_name: 'service.9douyu.com'
+          port: 21001
+          https: true
+        appconfig_9dy: 
+          server_name: 'appconfig.9douyu.com'
+          port: 21001
+          https: true
+        static_9dy: 
+          server_name: 'static.9douyu.com'
+          port: 21001
+          https: true
+        res_9dy: 
+          server_name: 'res.9douyu.com'
+          port: 21001
+          https: true
+        www_jdy: 
+          server_name: 'www.jiudouyu.com'
+          port: 21001
+          https: true
+        wx_jdy: 
+          server_name: 'wx.jiudouyu.com'
+          port: 21001
+          https: true
+        ios_jdy: 
+          server_name: 'ios.jiudouyu.com'
+          port: 21001
+          https: true
+        android_jdy: 
+          server_name: 'android.jiudouyu.com'
+          port: 21001
+          https: true
+        admin_jdy: 
+          server_name: 'admin.jiudouyu.com'
+          port: 21001
+          https: true
+        api_jdy: 
+          server_name: 'api.jiudouyu.com'
+          port: 21001
+          https: true
+        appconfig_jdy: 
+          server_name: 'appconfig.jiudouyu.com'
+          port: 21001
+          https: true
+        res_jdy: 
+          server_name: 'res.jiudouyu.com'
+          port: 21001
+          https: true
+        core: 
+          server_name: 'core.jiudouyu.com'
+          port: 21001
+          https: true
+        service: 
+          server_name: 'service.jiudouyu.com'
+          port: 21001
+          https: true  
+        static:
+          server_name: 'static.jiudouyu.com'
+          port: 21001
+          https: true
+        res_pre:
+          server_name: 'res-pre.jiudouyu.com'
+          port: 21001
+          https: true
+        appconfig_pre:
+          server_name: 'appconfig-pre.jiudouyu.com'
+          port: 21001
+          https: true
+        admin_pre:
+          server_name: 'admin-pre.jiudouyu.com'
+          port: 21001
+          https: true
+        api_pre:
+          server_name: 'api-pre.jiudouyu.com'
+          port: 21001
+          https: true
+        android_pre:
+          server_name: 'android-pre.jiudouyu.com'
+          port: 21001
+          https: true
+        ios_pre:
+          server_name: 'ios-pre.jiudouyu.com'
+          port: 21001
+          https: true
+        www_pre:
+          server_name: 'www-pre.jiudouyu.com'
+          port: 21001
+          https: true
+        wx_pre:
+          server_name: 'wx-pre.jiudouyu.com'
+          port: 21001
+          https: true
+        core_pre:
+          server_name: 'core-pre.jiudouyu.com'
+          port: 21001
+          https: true
+        service_pre:
+          server_name: 'service-pre.jiudouyu.com'
+          port: 21001
+          https: true
+        static_pre:
+          server_name: 'static-pre.jiudouyu.com'
+          port: 21001
+          https: true

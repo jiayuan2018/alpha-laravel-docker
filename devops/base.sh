@@ -4,9 +4,9 @@ NC='\033[0m'      # Normal Color
 RED='\033[0;31m'  # Error Color
 CYAN='\033[0;36m' # Info Color
 
-# CONFIG_SERVER
-# DOCKER_DOMAIN
-# devops_prj_path
+CONFIG_SERVER='http://dev-config.alpha-xudeyin.com.cn'
+DOCKER_DOMAIN='docker.io'
+developer_name=$('whoami')
 
 . $devops_prj_path/base/string.sh
 
@@ -115,6 +115,16 @@ function render_server_config {
     cmd="$cmd $CONFIG_SERVER/render-config > $out"
     run_cmd "$cmd"
     head $out && echo
+}
+
+
+function render_local_config {
+    local source_file=$1
+    local dst_file=$2
+    local config_key=$3
+    local config_value=$4
+
+    sed "s/{{ $config_key }}/$config_value/g" $source_file >> $dst_file
 }
 
 function list_contains() {

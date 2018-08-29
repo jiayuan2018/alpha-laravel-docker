@@ -24,9 +24,13 @@ work_dir_in_container='/opt/src'
 
 function init_config_by_developer_name() {
 
-    app=$developer_name-app
-
-    app_storage_dir="/Users/a002/opt/data/$app"
+    app=$developer_name-laravel-app
+    if [ "$(uname)" == "Darwin" ]; then
+        local current_user=$('whoami')
+        app_storage_dir="/Users/$current_user/opt/data/$app"
+    else
+        app_storage_dir="/opt/data/$app"
+    fi
     app_persitent_storage_dir=$app_storage_dir/persistent
     mysql_data_dir="$app_persitent_storage_dir/mysql/data"
     project_config_file=$app_persitent_storage_dir/auto-gen.manager.config
@@ -88,12 +92,12 @@ function do_init_for_dev() {
 
     local template_file="$templates_dir/global-config/manager.nginx_config.template"
     local config_key="http_port"
-    local config_val="80"
+    local config_val="8081"
     render_local_config $template_file $dst_file $config_key $config_val
 
     template_file="$templates_dir/global-config/manager.mysql_config.template"
     config_key="mysql_port"
-    config_val="3308"
+    config_val="3310"
     render_local_config $template_file $dst_file $config_key $config_val
 
     template_file="$templates_dir/nginx-sites/site-config.conf"
@@ -112,17 +116,18 @@ function build_code_config() {
 
     load_config_for_dev
 
-    local config_key=config
-    local config_file=$app_persitent_storage_dir/9douyu-dev.yaml
+    local template_file="$templates_dir/code-config/.env.example"
+    local dst_file="$templates_dir/code-config/.env"
+    local config_key="developer_name"
+    local config_val=$developer_name
+    render_local_config $template_file $dst_file $config_key $config_val
 
-    render_local_config $config_key $prj_dir/9douyu-core/.env.example $config_file $prj_dir/9douyu-core/.env
-    render_local_config $config_key $prj_dir/9douyu-module/.env.example $config_file $prj_dir/9douyu-module/.env
-    render_local_config $config_key $prj_dir/9douyu-service/.env.example $config_file $prj_dir/9douyu-service/.env
 
-    run_cmd "cp $prj_dir/9douyu-core/config/cache.example $prj_dir/9douyu-core/config/cache.php"
-    run_cmd "cp $prj_dir/9douyu-module/config/cache.example $prj_dir/9douyu-module/config/cache.php"
-    run_cmd "cp $prj_dir/9douyu-module/config/oss.example $prj_dir/9douyu-module/config/oss.php"
+    run_cmd "mv $templates_dir/code-config/.env $prj_dir/laravel-code/.env"
+    run_cmd "cp $templates_dir/code-config/cache.example $prj_dir/laravel-code/config/cache.php"
+    run_cmd "cp $templates_dir/code-config/oss.example $prj_dir/laravel-code/config/oss.php"
 }
+
 
 function load_config_for_dev() {
 
@@ -135,6 +140,12 @@ function load_config_for_dev() {
     mysql_port="$(read_kv_config "$project_config_file" "mysql_port")"
 }
 
+## This is for Deploy
+function do_init_for_deploy() {
+    _ensure_dirs
+    run_cmd "cp $config_dir/env-config/config.$env $project_config_file"
+}
+
 function load_config_for_deploy() {
     app_http_port=$(read_kv_config "$project_config_file" "http_port")
     php_fpm_port=$(read_kv_config "$project_config_file" "php_fpm_port")
@@ -143,10 +154,7 @@ function load_config_for_deploy() {
     app_https_port=$(read_kv_config "$project_config_file" "https_port")
 }
 
-function do_init_for_deploy() {
-    _ensure_dirs
-    run_cmd "cp $config_dir/env-config/config.$env $project_config_file"
-}
+
 
 source $devops_prj_path/base.sh
 
@@ -159,31 +167,106 @@ function push_php_base_image() {
     push_image $php_base_image
 }
 
-function update_composer(){
-    local cmd="cd $work_dir_in_container"
-    cmd="$cmd; cd $work_dir_in_container/laravel-code"
 
-    cmd="composer update"
-
-    _send_cmd_to_php "$cmd"
+## Mysql Container
+function to_mysql_env() {
+    local cmd='bash'
+    send_cmd_to_mysql_container "$cmd"
 }
 
 
-
-function init_app() {
-    local cmd="cd $work_dir_in_container"
-    cmd="$cmd; cd $work_dir_in_container/laravel-code"
-
-    cmd="$cmd; php artisan migrate --force"
-    cmd="$cmd; php artisan db:seed --force"
-
-    _send_cmd_to_php "$cmd"
+function delete_mysql() {
+    stop_mysql
+    local cmd="rm -rf $mysql_data_dir"
+    _sudo_for_stroage "$cmd"
 }
 
+function run_mysql() {
+    local args="--restart always"
+
+    args="$args -p $mysql_port:3306"
+
+    args="$args -v $mysql_data_dir:/var/lib/mysql"
+
+    # auto import data
+    args="$args -v $devops_prj_path/mysql-data/mysql-init:/docker-entrypoint-initdb.d/"
+
+    # config
+    args="$args -v $config_dir/mysql/conf/:/etc/mysql/conf.d/"
+
+    args="$args -v $app_log_dir/mysql/:/var/log/mysql/"
+
+    # execute import data
+    args="$args -v $devops_prj_path/mysql-data/mysql-import:$work_dir_in_container/mysql-import"
+    args="$args -w $work_dir_in_container"
+
+
+    # do not use password
+    args="$args -e MYSQL_ROOT_PASSWORD='' -e MYSQL_ALLOW_EMPTY_PASSWORD='yes'"
+    run_cmd "docker run -d $args --name $mysql_container $mysql_image"
+
+    _wait_mysql
+}
+
+function _wait_mysql() {
+    local cmd="while ! mysqladmin ping -h 127.0.0.1 --silent; do sleep 1; done"
+    send_cmd_to_mysql_container "$cmd"
+}
+
+function to_mysql() {
+    local cmd='mysql -h 127.0.0.1 -P 3306 -u root -p 9dy_db'
+    send_cmd_to_mysql_container "$cmd"
+}
+
+function send_cmd_to_mysql_container() {
+    local cmd=$1
+    run_cmd "docker exec $docker_run_fg_mode $mysql_container bash -c '$cmd'"
+}
+
+function stop_mysql() {
+    stop_container $mysql_container
+}
+
+function restart_mysql() {
+    stop_mysql
+    run_mysql
+}
+
+
+function import_mysql_data() {
+    local cmd='cd mysql-import/; for file in `ls *`; do db_name=$(echo $file | cut -d"-" -f 1); mysql -uroot --default-character-set=utf8 $db_name < $file; done'
+    echo $cmd
+    send_cmd_to_mysql_container "$cmd"
+}
+
+## Redis Container
+function run_redis() {
+    local args="--restart always"
+    args="$args -v $config_dir/redis/redis.conf:/usr/local/etc/redis/redis.conf"
+    local cmd='redis-server /usr/local/etc/redis/redis.conf'
+    run_cmd "docker run -d $args --name $redis_container $redis_image $cmd"
+}
+
+function stop_redis() {
+    stop_container $redis_container
+}
+
+function to_redis() {
+    local cmd='redis-cli'
+    run_cmd "docker exec $docker_run_fg_mode $redis_container bash -c '$cmd'"
+}
+
+function restart_redis() {
+    stop_redis
+    run_redis
+}
+
+
+## PHP Container
 
 function to_php() {
     local cmd='bash'
-    _send_cmd_to_php "cd $docker_code_root_dir; $cmd"
+    _send_cmd_to_php "cd $work_dir_in_container; $cmd"
 }
 
 function _send_cmd_to_php() {
@@ -219,11 +302,6 @@ function _run_php_container() {
     run_cmd "docker run -d $args -h $php_container --name $php_container $php_base_image bash -c '$cmd'"
 }
 
-function _sudo_for_stroage() {
-    local cmd=$1
-    run_cmd "docker run --rm $docker_run_fg_mode -v $app_storage_dir:$app_storage_dir docker.sunfund.com/busybox sh -c '$cmd'"
-}
-
 
 function stop_php() {
     stop_container $php_container
@@ -234,94 +312,7 @@ function restart_php() {
     run_php
 }
 
-function to_php() {
-    run_cmd "docker exec $docker_run_fg_mode $php_container bash -c 'cd $work_dir_in_container; bash'"
-}
-
-function to_mysql_env() {
-    local cmd='bash'
-    send_cmd_to_mysql_container "$cmd"
-}
-
-function import_mysql_data() {
-    local cmd='cd apuppy/data/mysql-import/; for file in `ls */*`; do mysql -uroot --default-character-set=utf8 9dy_db < $file; done'
-    send_cmd_to_mysql_container "$cmd"
-}
-
-function delete_mysql() {
-    stop_mysql
-    local cmd="rm -rf $mysql_data_dir"
-    _sudo_for_stroage "$cmd"
-}
-
-function run_mysql() {
-    local args="--restart always"
-
-    args="$args -p $mysql_port:3306"
-
-    args="$args -v $mysql_data_dir:/var/lib/mysql"
-
-    # auto import data
-    args="$args -v $devops_prj_path/mysql-data/mysql-init:/docker-entrypoint-initdb.d/"
-
-    # config
-    args="$args -v $config_dir/mysql/conf/:/etc/mysql/conf.d/"
-
-    args="$args -v $app_log_dir/mysql/:/var/log/mysql/"
-
-
-    # do not use password
-    args="$args -e MYSQL_ROOT_PASSWORD='' -e MYSQL_ALLOW_EMPTY_PASSWORD='yes'"
-    run_cmd "docker run -d $args --name $mysql_container $mysql_image"
-
-    _wait_mysql
-}
-
-function _wait_mysql() {
-    local cmd="while ! mysqladmin ping -h 127.0.0.1 --silent; do sleep 1; done"
-    send_cmd_to_mysql_container "$cmd"
-}
-
-function to_mysql() {
-    local cmd='mysql -h 127.0.0.1 -P 3306 -u root -p 9dy_db'
-    send_cmd_to_mysql_container "$cmd"
-}
-
-function send_cmd_to_mysql_container() {
-    local cmd=$1
-    run_cmd "docker exec $docker_run_fg_mode $mysql_container bash -c '$cmd'"
-}
-
-function stop_mysql() {
-    stop_container $mysql_container
-}
-
-function restart_mysql() {
-    stop_mysql
-    run_mysql
-}
-
-function run_redis() {
-    local args="--restart always"
-    args="$args -v $config_dir/redis/redis.conf:/usr/local/etc/redis/redis.conf"
-    local cmd='redis-server /usr/local/etc/redis/redis.conf'
-    run_cmd "docker run -d $args --name $redis_container $redis_image $cmd"
-}
-
-function stop_redis() {
-    stop_container $redis_container
-}
-
-function to_redis() {
-    local cmd='redis-cli'
-    run_cmd "docker exec $docker_run_fg_mode $redis_container bash -c '$cmd'"
-}
-
-function restart_redis() {
-    stop_redis
-    run_redis
-}
-
+## Nginx Container
 function run_nginx() {
 
     local nginx_data_dir="$devops_prj_path/nginx-data"
@@ -359,10 +350,35 @@ function restart_nginx() {
     run_nginx
 }
 
+
+## Common
+function _sudo_for_stroage() {
+    local cmd=$1
+    run_cmd "docker run --rm $docker_run_fg_mode -v $app_storage_dir:$app_storage_dir busybox sh -c '$cmd'"
+}
+
+function update_composer(){
+    local cmd="cd $work_dir_in_container"
+    cmd="$cmd; cd $work_dir_in_container/laravel-code"
+    cmd="composer update"
+
+    _send_cmd_to_php "$cmd"
+}
+
+function init_app() {
+    local cmd="cd $work_dir_in_container"
+
+    cmd="$cmd; php artisan migrate --force"
+    cmd="$cmd; php artisan db:seed --force"
+
+    _send_cmd_to_php "$cmd"
+}
+
+
 function _clean() {
     stop_nginx
     stop_php
-    delete_mysql
+    #delete_mysql
     stop_redis
     local cmd="rm -rf $app_storage_dir/*"
     _sudo_for_stroage "$cmd"
@@ -374,16 +390,21 @@ function clean() {
 
 function new_egg() {
     run_mysql
-    #build_code_config
+    build_code_config
 
     run_redis
     run_php
     run_nginx
 
-    init_app
-    #import_mysql_data
+    #update_composer
 
+    init_app
+    import_mysql_data
 }
+
+
+
+################## Deploy Script##############
 
 function build_and_push_all_images() {
     build_and_push_php_related_images

@@ -2,7 +2,7 @@
 /laravel-code/public/hot
 /laravel-code/public/storage
 /laravel-code/storage
-/laravel-code/vendor/*
+/laravel-code/vendor
 /.idea
 /.vscode
 /.vagrant

@@ -378,7 +378,7 @@ function init_app() {
 function _clean() {
     stop_nginx
     stop_php
-    #delete_mysql
+    stop_mysql
     stop_redis
     local cmd="rm -rf $app_storage_dir/*"
     _sudo_for_stroage "$cmd"
@@ -396,7 +396,7 @@ function new_egg() {
     run_php
     run_nginx
 
-    #update_composer
+    update_composer
 
     init_app
     import_mysql_data

@@ -15,7 +15,7 @@ RUN apt-get update && apt-get install -y \
 # Create the supervisord init
 COPY supervisord.conf /etc/supervisord.conf
 COPY supervisor-example.ini /etc/supervisord.d/supervisor-ex.ini
-RUN mkdir /etc/supervisord.d
+
 
 
 # Mount the php-code

@@ -476,6 +476,11 @@ function run_php_image() {
     args="$args -h $host"
 
     args="$args -p $php_fpm_port:9000"
+
+    # Mount config file
+    args="$args -v $config_dir/php/conf/php.ini:/usr/local/etc/php/php.ini"
+    args="$args -v $config_dir/php/conf/php-fpm.conf:/usr/local/etc/php-fpm.conf"
+
     # Mount php logs
     args="$args -v $app_log_dir/php:/var/log/php"
     args="$args -v $app_log_dir/crontab:/var/log/crontab"
@@ -504,6 +509,10 @@ function run_php_schedule_image() {
     args="$args -h $host"
 
     args="$args -p $php_schedule_port:9000"
+
+    # Mount config file
+    args="$args -v $config_dir/php/conf/php.ini:/usr/local/etc/php/php.ini"
+    args="$args -v $config_dir/php/conf/php-fpm.conf:/usr/local/etc/php-fpm.conf"
 
     # Mount schedule logs
     args="$args -v $app_schedule_log_dir/php:/var/log/php"

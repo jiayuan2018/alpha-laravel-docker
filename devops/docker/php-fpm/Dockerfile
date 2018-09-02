@@ -2,9 +2,12 @@ FROM php:7.2-fpm
 
 COPY ./sources.list /etc/apt/sources.list
 
+
+
 # Extensions: ctype, dom, fileinfo, ftp, hash, iconv, json, pdo, pdo_sqlite, session,
 # tokenizer, simplexml, xml, xmlreader, xmlwriter and phar are bundled and compiled into
 # PHP by default. If missing, install them directly by `docker-php-ext-install extension_name`
+
 
 # Notice:
 # 1. Mcrypt was DEPRECATED in PHP 7.1.0, and REMOVED in PHP 7.2.0.
@@ -12,8 +15,7 @@ COPY ./sources.list /etc/apt/sources.list
 # 3. soap requires libxml2-dev.
 # 4. xml, xmlrpc, wddx require libxml2-dev and libxslt-dev.
 # 5. Line `&& :\` is just for better reading and do nothing.
-RUN apt-get update \
-    && apt-get install -y libfreetype6-dev libjpeg62-turbo-dev libpng-dev \
+RUN apt-get update  && apt-get install -y libfreetype6-dev libjpeg62-turbo-dev libpng-dev \
     && docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ \
     && docker-php-ext-install gd \
     && :\
@@ -44,14 +46,16 @@ RUN apt-get update \
     && docker-php-ext-install sysvmsg \
     && docker-php-ext-install sysvsem \
     && docker-php-ext-install sysvshm \
-    && docker-php-ext-install opcache
+    && docker-php-ext-install opcache \
+    && rm -rf /var/lib/apt/lists/*
 
-# Composer
+# Install Composer
 RUN php -r "copy('https://install.phpcomposer.com/installer', 'composer-setup.php');" \
     && php composer-setup.php \
     && php -r "unlink('composer-setup.php');" \
     && mv composer.phar /bin/composer \
     && composer config -g repo.packagist composer https://packagist.phpcomposer.com
+
 
 # Install Xdebug extension from source
 COPY ./xdebug-2.6.0.tgz /tmp/xdebug.tgz
@@ -64,7 +68,6 @@ RUN mkdir -p /tmp/xdebug \
 
 # Install Memcache and redis extension from pecl
 # RUN pecl install memcached-2.2.0 && pecl install redis-2.2.7
-
 
 # Install Redis extension from source
 COPY ./redis-4.1.0.tgz /tmp/redis.tgz

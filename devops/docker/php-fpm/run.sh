@@ -13,7 +13,7 @@ function run_prod() {
     chmod +x /opt/crontab
     crontab /opt/crontab
     cron -f &
-    /usr/local/bin/supervisord -c /etc/supervisord.conf
+    /usr/bin/supervisord -c /etc/supervisord.conf
 }
 
 action=${1:-help}

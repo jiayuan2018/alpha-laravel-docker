@@ -1,5 +1,5 @@
-http_port=21000
-php_nginx_port=21001
-php_fpm_port=21002
-https_port=21003
-php_schedule_port=21004
+php_fpm_port=9000
+http_port=80
+https_port=443
+php_nginx_port=21002
+php_schedule_port=21003

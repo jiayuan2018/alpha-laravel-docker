@@ -1,0 +1,1 @@
+5 0 */10 * *  bash /opt/archive.sh  >> /var/log/crontab/archive_php_nginx.log

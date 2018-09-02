@@ -31,7 +31,7 @@ read_buffer_size = 256K
 read_rnd_buffer_size = 512K
 myisam_sort_buffer_size = 8M
 bind_address=*
-lower_case_table_names=1
+lower_case_table_names=0
 default-time-zone='+8:00'
 
 [mysqld_safe]

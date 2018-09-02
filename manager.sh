@@ -481,6 +481,9 @@ function run_php_image() {
     args="$args -v $app_log_dir/crontab:/var/log/crontab"
     args="$args -v $php_storage_dir/laravel-app:$work_dir_in_container/laravel-app/storage"
 
+    # If there is no redis
+    args="$args --link $redis_container:redis"
+
     args="$args -w $work_dir_in_container"
 
     local image_name=$(_get_image_name 'rosettas/alpha-php')

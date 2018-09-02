@@ -14,12 +14,14 @@ RUN apt-get update && apt-get install -y \
 
 # Create the supervisord init
 COPY supervisord.conf /etc/supervisord.conf
+COPY supervisor-example.ini /etc/supervisord.d/supervisor-ex.ini
 RUN mkdir /etc/supervisord.d
 
 
 # Mount the php-code
-COPY app-vendor /opt/src/laravel-app/vendor
 COPY laravel-app /opt/src/laravel-app
+COPY app-vendor  /opt/src/laravel-app/vendor
+
 
 
 

@@ -1,4 +1,4 @@
-http_port=80
+http_port=8080
 https_port=443
 php_nginx_port=21002
 php_schedule_port=21003

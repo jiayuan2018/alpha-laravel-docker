@@ -19,7 +19,7 @@ RUN mkdir /etc/supervisord.d
 
 # Mount the php-code
 COPY app-vendor /opt/src/laravel-app/vendor
-COPY laravel-app /opt/src/larevel-app
+COPY laravel-app /opt/src/laravel-app
 
 
 

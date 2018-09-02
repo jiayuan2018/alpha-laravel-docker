@@ -709,6 +709,7 @@ function restart_all_on_this_node() {
 }
 
 function stop_all() {
+    stop_redis
     stop_php_nginx_image
     stop_php_image
     stop_gateway_nginx_image

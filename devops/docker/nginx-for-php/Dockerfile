@@ -1,4 +1,4 @@
-FROM nginx:1.11-alpine
+FROM nginx:1.11
 
 #COPY Shanghai /usr/share/zoneinfo/Asia/Shanghai
 #RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime

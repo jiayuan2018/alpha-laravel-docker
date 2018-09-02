@@ -14,7 +14,7 @@ config_dir="$devops_prj_path/config"
 
 mysql_image=mysql:5.6
 redis_image=redis:3.0.1
-nginx_image=nginx:1.11-alpine
+nginx_image=nginx:1.11
 php_base_image=rosettas/alpha-php:7.2-fpm
 php_crontab_image=rosettas/alpha-php:7.2-fpm
 

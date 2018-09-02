@@ -687,6 +687,7 @@ function stop_php_nginx_image() {
 
 
 function start_all() {
+    run_redis
     run_php_image
     run_php_nginx_image
     run_gateway_nginx_image

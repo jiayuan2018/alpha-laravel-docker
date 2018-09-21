@@ -9,8 +9,6 @@ return [
         'accessKeySecret' => '02cWnVVWK3yLyqoIw9w2P1pDG3RjFc',
         'bucket'          => 'test-zhuotao-1',
     ],
-
-
     //Oss合同存储bucket 私有读写权限
     'oss_2' => [
         'endpoint'        => 'oss-cn-qingdao.aliyuncs.com',

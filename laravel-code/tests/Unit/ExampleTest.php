@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use PHPUnit\Framework\TestResult;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -15,5 +16,12 @@ class ExampleTest extends TestCase
     public function testBasicTest()
     {
         $this->assertTrue(true);
+    }
+
+
+
+    public function run(TestResult $result = null)
+    {
+        // TODO: Implement run() method.
     }
 }

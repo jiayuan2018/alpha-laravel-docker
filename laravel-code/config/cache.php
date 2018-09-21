@@ -51,15 +51,10 @@ return [
             'driver' => 'memcached',
             'servers' => [
                 [
-                    'host' => '127.0.0.1',
-                    'port' => 11211,
+                    'host'   => env('MEMCACHE_HOST','127.0.0.1'),
+                    'port'   => env('MEMCACHE_PORT'),
                     'weight' => 100,
-                ],
-                [
-                    'host' => '127.0.0.1',
-                    'port' => 11212,
-                    'weight' => 100,
-                ],
+                ]
             ],
         ],
 

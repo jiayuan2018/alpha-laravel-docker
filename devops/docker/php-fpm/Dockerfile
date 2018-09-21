@@ -79,5 +79,45 @@ RUN mkdir -p /tmp/redis \
     && docker-php-ext-install /tmp/redis \
     && rm -r /tmp/redis
 
+# Install PHPUnit
+RUN curl -L https://phar.phpunit.de/phpunit-5.7.phar >> /tmp/phpunit.phar && mv /tmp/phpunit.phar /usr/local/bin/phpunit && chmod a+x /usr/local/bin/phpunit
+
+
+
+# Install Memcache
+COPY ./pecl-memcache-php7.tgz /tmp/pecl-memcache-php7.tgz
+RUN ls /tmp
+RUN mkdir -p /tmp/pecl-memcache-php7 \
+    && tar -xf /tmp/pecl-memcache-php7.tgz -C /tmp/pecl-memcache-php7 --strip-components=1 \
+    && rm /tmp/pecl-memcache-php7.tgz \
+    && cd /tmp/pecl-memcache-php7 \
+    && /usr/local/bin/phpize \
+    && ./configure --with-php-config=/usr/local/bin/php-config \
+    && make \
+    && make install \
+    && echo "extension=memcache.so" > /usr/local/etc/php/conf.d/docker-php-ext-memcache.ini \
+    && rm -rf /tmp/pecl-memcache-php7
+
+
+# Install Memcached
+COPY ./php7-memcached.tgz /tmp/php7-memcached.tgz
+RUN ls /tmp
+RUN apt-get update && apt-get install -y \
+            libmemcached11 \
+            libmemcachedutil2 \
+            libmemcached-dev \
+            libz-dev \
+    && mkdir -p /tmp/php7-memcached \
+    && tar -xf /tmp/php7-memcached.tgz -C /tmp/php7-memcached --strip-components=1 \
+    && rm /tmp/php7-memcached.tgz \
+    && cd /tmp/php7-memcached \
+    && /usr/local/bin/phpize \
+    && ./configure --with-php-config=/usr/local/bin/php-config \
+    && make \
+    && make install \
+    && echo "extension=memcached.so" > /usr/local/etc/php/conf.d/docker-php-ext-memcached.ini \
+    && rm -rf /tmp/php7-memcached
+
+
 
 COPY run.sh /usr/local/bin/run.sh

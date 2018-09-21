@@ -15,6 +15,8 @@ Route::pattern('subDomain', '(wap|wx)');
 Route::group(['prefix'=>'/','namespace'=>'Wap','domain'=>'{subDomain}.'.$domain],function(){
 
     Route::get('/', 'WebController@index');
+    Route::any('/wap/index', 'WebController@index')->name('wap-list-index');
+    Route::get('/wap/list',  'WebController@getNewsList')->name('wap-get-news-list');
 
 });
 

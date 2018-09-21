@@ -4,6 +4,8 @@ APP_ENV=production
 APP_KEY=base64:7upP1D3BafrcMtPpvMUtwM5+FULSPZpiFpb3b4lXpL4=
 APP_DEBUG=false
 APP_URL=http://www.alpha-laravel.com
+APP_TIMEZONE=Asia/Shanghai
+APP_LOCALE=zh-CN
 
 
 # Domain
@@ -33,11 +35,11 @@ DB_PREFIX=app_
 BROADCAST_DRIVER=log
 
 # Cache
-CACHE_DRIVER=file
+CACHE_DRIVER=memcached
 
 # Session
-SESSION_DRIVER=file
-SESSION_LIFETIME=120
+SESSION_DRIVER=memcached
+SESSION_LIFETIME=30
 
 # Queue
 QUEUE_DRIVER=database
@@ -46,6 +48,10 @@ QUEUE_DRIVER=database
 REDIS_HOST=redis
 REDIS_PASSWORD=null
 REDIS_PORT=6379
+
+# Memcached
+MEMCACHE_HOST=memcached
+MEMCACHE_PORT=11211
 
 # Mail
 MAIL_DRIVER=smtp

@@ -15,6 +15,7 @@ config_dir="$devops_prj_path/config"
 mysql_image=mysql:5.6
 redis_image=redis:3.0.1
 nginx_image=nginx:1.11
+memcached_image=memcached:1.5
 php_base_image=rosettas/alpha-php:7.2-fpm
 php_crontab_image=rosettas/alpha-php:7.2-fpm
 
@@ -46,9 +47,11 @@ function init_config_by_developer_name() {
 
 	mysql_container=$app-mysql
     redis_container=$app-redis
+    memcached_container=$app-memcached
     php_nginx_container=$app-php-nginx
     php_container=$app-php
     php_schedule_container=$app-php-schedule
+
     gateway_nginx_container="$app-gateway-nginx"
 }
 
@@ -263,6 +266,24 @@ function restart_redis() {
     run_redis
 }
 
+## Memcached Container
+
+run_memcached() {
+    local args="--restart always"
+    args="$args -p 11211:11211"
+    args="$args -v $config_dir/memcached/memcached.conf:/etc/memcached.conf"
+    run_cmd "docker run -d $args --name $memcached_container $memcached_image"
+}
+
+stop_memcached() {
+    stop_container $memcached_container
+}
+
+restart_memcached() {
+    stop_memcached
+    run_memcached
+}
+
 
 ## PHP Container
 
@@ -300,6 +321,7 @@ function _run_php_container() {
 
     args="$args --link $mysql_container:mysql"
     args="$args --link $redis_container:redis"
+    args="$args --link $memcached_container:memcached"
 
     local cmd=$1
     run_cmd "docker run -d $args -h $php_container --name $php_container $php_base_image bash -c '$cmd'"
@@ -383,7 +405,8 @@ function _clean() {
     stop_php
     stop_mysql
     stop_redis
-    local cmd="rm -rf $app_storage_dir/*"
+    stop_memcached
+    local cmd="rm -rf $app_storage_dir/"
     _sudo_for_stroage "$cmd"
 }
 
@@ -396,6 +419,7 @@ function new_egg() {
     build_code_config
 
     run_redis
+    run_memcached
     run_php
     run_nginx
 
